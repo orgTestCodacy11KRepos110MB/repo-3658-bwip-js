@@ -34,10 +34,17 @@ bwip-js is a translation to native JavaScript of the amazing code provided in <a
 All linear and two-dimensional barcodes in common use (and many uncommon
 ones) are available.  An exhaustive list of supported barcode types can be
 found at the end of this document.  Barcode images are generated as png (node-js) or to a canvas (browser).</p>
+<blockquote>
+  <p>Version 3 is on its last planned release.  Version 4 will be ESM-only,
+  scheduled for January 2023.  Internet Explorer will no longer be supported.
+  Node.js will require at least version 12.  SVG output on all platforms will be officially
+  supported.</p>
+  <p>Please prepare your code for the migration.</p>
+</blockquote>
 <h2 id="status">Status</h2>
 <ul>
-<li>Current bwip-js version is 3.1.0 (2022-06-20)</li>
-<li>Current BWIPP version is 2022-06-10</li>
+<li>Current bwip-js version is 3.2.0 (2022-12-06)</li>
+<li>Current BWIPP version is 2022-10-19</li>
 <li>Node.js compatibility: 0.12+</li>
 <li>Browser compatibility: Edge, Firefox, Chrome</li>
 </ul>
@@ -46,6 +53,7 @@ found at the end of this document.  Barcode images are generated as png (node-js
 <li><a href="#browser-usage">Browser</a></li>
 <li><a href="#react-usage">React App</a></li>
 <li><a href="#nodejs-request-handler">Node.js</a></li>
+<li><a href="#react-native">React Native</a></li>
 <li><a href="#electron-example">Electron</a></li>
 <li><a href="#command-line-interface">Command Line</a></li>
 </ul>
@@ -341,6 +349,43 @@ try {
 }
 </code></pre>
 <p>When named encoders are imported, the <code>bcid</code> value in the options object is ignored.</p>
+<p><a name="react-native"></a></p>
+<h2 id="reactnativeusage">React Native Usage</h2>
+<blockquote>
+  <p>Note: The react-native module requires an external dependency to polyfill
+  missing nodejs built-ins <code>zlib</code> and <code>Buffer</code>.</p>
+  <p>You <em>must</em> manually add it to your project.  The dependency will not
+  be included in bwip-js as it is only needed for react-native.  To install:</p>
+</blockquote>
+<pre><code>npm install react-zlib-js --save
+</code></pre>
+<p>The react-native module provides a specialized version of the <code>toBuffer()</code> method, 
+called <code>toDataURL()</code>.  The return value is an object with the following properties:</p>
+<ul>
+<li><code>height</code> : The height of the image, in pixels.</li>
+<li><code>width</code> : The width of the image, in pixels.</li>
+<li><code>uri</code> : A string containing the data URL for the image.</li>
+</ul>
+<p>The returned object is designed to be used with the <code>&lt;Image&gt;</code> component:</p>
+<pre><code class="javascript language-javascript">import React from 'react';
+import 'react-zlib-js'; // side effects only
+import bwipjs from 'bwip-js';
+
+const BarCode = (options) =&gt; {
+    let img = null;
+    try {
+        img = await bwipjs.toDataURL(options);
+    } catch (e) {
+        // `e` may be a string or Error object
+    }
+    return (
+        &lt;Image
+           style={{ height:img.height, width:img.width }}
+           source={{ uri:img.uri }}
+        /&gt;
+    );
+};
+</code></pre>
 <p><a name="electron-example"></a></p>
 <h2 id="electronexample">Electron Example</h2>
 <p>There have been some changes to the Electron bundler, and it may pull in either the
